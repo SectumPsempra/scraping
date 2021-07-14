@@ -4,24 +4,15 @@ import bs4
 text= "fishing dispute in south china sea"
 result_per_page = 10
 
-# The area specific url uses google china/us domain, this is based on the fact
-# that if you are based out of a certain location, google will show results
-# specific to that location first
-chinese_url = f"https://google.com.hk/search?q={text}&num={result_per_page}&"\
+# The area specific url uses google china(asian)/us domain, this is based on
+# the fact that if you are based out of a certain location, google will show
+# results specific to that location first
+asian_url = f"https://google.com.hk/search?q={text}&num={result_per_page}&"\
                 "hl=zh-CN&sourceid=cnhp%2F/"
 
 us_url = f"https://google.com/search?q={text}&num={result_per_page}"
-  
-# def get_heading(soup_obj):
-#     """news heading found in google result
-#
-#     Args:
-#         soup: soup object to iterate over
-#     Returns:
-#         heading_object: list of all news headings
-#     """
-#     heading_object=soup_obj.find_all( 'h3' )
-#     return heading_object
+
+groups_dict = {}
 
 def parse_url(url):
     """Parse the given url.
@@ -84,11 +75,15 @@ def get_content_from_news_urls(soup):
     return articles_list
 
 # Comment/Uncomment below code to hide/show data based on US source:
-# soup_obj_us_news = parse_url(us_url)
-# articles_list = get_content_from_news_urls(soup_obj_us_news)
+soup_obj_us_news = parse_url(us_url)
+group_1_articles_list = get_content_from_news_urls(soup_obj_us_news)
 
 # Comment/Uncomment below code to hide/show data based on Asian source:
-soup_obj_asian_news = parse_url(chinese_url)
+soup_obj_asian_news = parse_url(asian_url)
+group_2_articles_list = get_content_from_news_urls(soup_obj_asian_news)
+
 # Pass this list to gpt2, or you can further break each string down using full
 # stop as a separator.
-articles_list = get_content_from_news_urls(soup_obj_asian_news)
+# 'Group A' denotes US group, 'Group B' denotes Asian group.
+groups_dict["Group A"] = group_1_articles_list
+groups_dict["Group B"] = group_2_articles_list
