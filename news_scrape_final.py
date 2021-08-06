@@ -12,15 +12,16 @@ SEARCH_ENGINE_SOURCE_ID = ""
 
 # Specify groups based on news urls
 GROUPS = {
-    "washingtonpost.com": "USA", "edition.cnn.com": "USA",
-    "nytimes.com": "USA", "bbc.com": "USA", "scmp.com": "ASIA",
-    "globaltimes.cn": "ASIA", "chinadaily.com.cn": "ASIA",
-    "thediplomat.com": "ASIA"
+    "USA": ["washingtonpost.com", "edition.cnn.com", "nytimes.com",
+            "bbc.com"],
+    "ASIA": ["scmp.com", "globaltimes.cn", "chinadaily.com.cn",
+            "thediplomat.com", "wionews.com", "asia.nikkei.com", "aninews.in"]
 }
+
 OTHER_GROUP = "OTHERS"
 
 # Increase this number to get more results
-RESULT_PER_PAGE = 3
+RESULT_PER_PAGE = 10
 
 # Final results, pass this dict as input to ml model 
 RESULT = {}
@@ -149,13 +150,14 @@ def _get_content(soup: bs4.BeautifulSoup, keyword: str="") -> dict:
     return articles
 
 
-def _format_result(articles: dict, topic_count: int,
+def _format_result(articles: dict, group: str, topic_count: int,
     topic_prefix: str="TOPIC_", group_prefix: str="GROUP_") -> None:
     """Format the result articles by group and topic
     
     Args:
         articles (dict): articles dictionary where key is url and value is
             article's content
+        group (str): source of the news article
         topic_count (int): index of current topic
         topic_prefix (str): prefix to use for topic
         group_prefix (str): prefix to use for group
@@ -163,19 +165,15 @@ def _format_result(articles: dict, topic_count: int,
     Returns:
         None
     """
-    for url in articles:
-        key = ""
-        for valid_url in GROUPS:
-            if valid_url in url:
-                key = GROUPS[valid_url]
-        if not key:
-            key = OTHER_GROUP
-        result_key = group_prefix + str(key) + "_" + topic_prefix +\
+    result_key = group_prefix + str(group) + "_" + topic_prefix +\
                 str(topic_count+1)
-        if RESULT.get(result_key):
-            RESULT[result_key] = RESULT[result_key] + [articles[url]]
-        else:
-            RESULT[result_key] = [articles[url]]
+    for url in articles:
+        if group==OTHER_GROUP or any(group_url in url for group_url in 
+                GROUPS[group]):
+            if RESULT.get(result_key):
+                RESULT[result_key] = RESULT[result_key] + [articles[url]]
+            else:
+                RESULT[result_key] = [articles[url]]
 
 
 if __name__ == "__main__":
@@ -186,10 +184,21 @@ if __name__ == "__main__":
         TOPICS.append(str(input(f"Enter topic no. {i+1}: ")))
 
     print(f"Selected Topics: {TOPICS}\n")
-    
+
+    group = input("Please select one group out of the following: u(USA),"
+                    " a(Asia), o(Others): ")
+    if group=="u":
+        group = "USA"
+        TOPIC_PREFIX = "us news: "
+    elif group=="a":
+        group = "ASIA"
+        TOPIC_PREFIX = "asia news: "
+    else:
+        group = OTHER_GROUP
+
     RESULT_PER_PAGE = int(input("Enter number of results you want per"
-        " page for each topic (default is 3 results/page, 10 results/page is"
-        " recommended for better results): "))
+        " page for each topic (default is 10 results/page, 20-50 results/page"
+        " is recommended for better results): "))
 
     print("\nProcessing inputs.....\n")
 
@@ -200,5 +209,6 @@ if __name__ == "__main__":
             SEARCH_ENGINE_URL, SEARCH_ENGINE_SOURCE_ID, RESULT_PER_PAGE)
         soup_obj = _get_soup_object(url)
         articles = _get_content(soup_obj)
-        _format_result(articles, topic_count, topic_prefix, group_prefix)
+        _format_result(articles, group, topic_count, topic_prefix,
+            group_prefix)
     print(RESULT)
