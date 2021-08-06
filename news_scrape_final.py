@@ -35,9 +35,9 @@ FILTER_URLS = (
 )
 
 
-def _get_search_string(topic, tab="nws", topic_prefix="",
-        parent_url="https://google.com", location_source_id="",
-        result_per_page=RESULT_PER_PAGE) -> str:
+def _get_search_string(topic: str, tab: str="nws", topic_prefix: str="",
+        parent_url: str="https://google.com", location_source_id: str="",
+        result_per_page: int=RESULT_PER_PAGE) -> str:
     """Returns search url.
 
     Args:
@@ -58,7 +58,7 @@ def _get_search_string(topic, tab="nws", topic_prefix="",
     return url
 
 
-def _get_soup_object(url) -> bs4.BeautifulSoup:
+def _get_soup_object(url: str) -> bs4.BeautifulSoup:
     """Parse the given url.
 
     Args:
@@ -72,7 +72,7 @@ def _get_soup_object(url) -> bs4.BeautifulSoup:
     return soup
 
 
-def _get_urls(soup, keyword=None) -> list:
+def _get_urls(soup: bs4.BeautifulSoup, keyword: str="") -> list:
     """Get news links from the google search.
 
     Args:
@@ -98,7 +98,7 @@ def _get_urls(soup, keyword=None) -> list:
     return valid_urls
 
 
-def _filter_duplicate_urls(urls) -> set:
+def _filter_duplicate_urls(urls: list) -> set:
     """Filter duplicate urls from the valid urls
 
     Args:
@@ -114,7 +114,7 @@ def _filter_duplicate_urls(urls) -> set:
     return clean_urls
 
 
-def _get_content(soup, keyword=None):
+def _get_content(soup: bs4.BeautifulSoup, keyword: str="") -> dict:
     """Get content from each news url if article is valid.
 
     Args:
@@ -149,8 +149,8 @@ def _get_content(soup, keyword=None):
     return articles
 
 
-def _format_result(articles, topic_count, topic_prefix="TOPIC_",
-    group_prefix="GROUP_") -> None:
+def _format_result(articles: dict, topic_count: int,
+    topic_prefix: str="TOPIC_", group_prefix: str="GROUP_") -> None:
     """Format the result articles by group and topic
     
     Args:
@@ -161,7 +161,7 @@ def _format_result(articles, topic_count, topic_prefix="TOPIC_",
         group_prefix (str): prefix to use for group
 
     Returns:
-        articles_list (list): list containing content of different articles
+        None
     """
     for url in articles:
         key = ""
